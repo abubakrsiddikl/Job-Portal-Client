@@ -4,7 +4,8 @@ import { useAuth } from "../../hook/useAuth";
 import Swal from "sweetalert2";
 
 const JobApply = () => {
-  const id = useParams();
+  const {id} = useParams();
+  
   const { user } = useAuth();
   const navigate = useNavigate();
   // console.log(id, user)

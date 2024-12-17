@@ -1,14 +1,37 @@
 import React from "react";
+import toast from "react-hot-toast";
+import { useAuth } from "../../hook/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const AddJob = () => {
+  const navigate = useNavigate();
+  const {user} = useAuth();
   const handleAddJob = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const initialData = Object.fromEntries(formData.entries());
-    console.log(initialData)
+    console.log(initialData);
     const { min, max, currency, ...newJob } = initialData;
-     newJob.salaryRange = {min,max,currency};
-     console.log(newJob)
+    newJob.salaryRange = { min, max, currency };
+    newJob.requirements = newJob.requirements.split("\n");
+    newJob.responsibilities = newJob.responsibilities.split("\n");
+    console.log(newJob);
+
+    //  add to job in database
+    fetch("http://localhost:5000/jobs", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(newJob),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.insertedId) {
+          toast.success("Job added successfull .");
+          navigate("/myPostedJobs")
+        }
+      });
   };
   return (
     <div>
@@ -45,10 +68,8 @@ const AddJob = () => {
           <label className="label">
             <span className="label-text">Job Type</span>
           </label>
-          <select className="select select-ghost select-bordered w-full max-w-xs">
-            <option disabled selected>
-              Pick a Job Type
-            </option>
+          <select defaultValue="Pick a Job Type" className="select select-ghost select-bordered w-full max-w-xs">
+            <option disabled>Pick a Job Type</option>
             <option>Full-Time</option>
             <option>Intern</option>
             <option>Part-Time</option>
@@ -59,10 +80,8 @@ const AddJob = () => {
           <label className="label">
             <span className="label-text">Job Field</span>
           </label>
-          <select className="select select-ghost select-bordered w-full max-w-xs">
-            <option disabled selected>
-              Pick a Job Field
-            </option>
+          <select defaultValue="Pick a Job Field" className="select select-ghost select-bordered w-full max-w-xs">
+            <option disabled>Pick a Job Field</option>
             <option>Engeneearig</option>
             <option>Finance</option>
             <option>Software</option>
@@ -93,13 +112,11 @@ const AddJob = () => {
           </div>
           {/* Currency */}
           <div className="form-control">
-            <select
+            <select defaultValue="Pick a Currency"
               name="currency"
               className="select select-ghost select-bordered w-full max-w-xs"
             >
-              <option disabled selected>
-                Pick a Currency
-              </option>
+              <option disabled>Pick a Currency</option>
               <option>BDT</option>
               <option>USD</option>
               <option>INA</option>
@@ -151,7 +168,7 @@ const AddJob = () => {
           <textarea
             className="textarea textarea-bordered"
             placeholder="Write each responsibilities put in a new line"
-            name="requirements"
+            name="responsibilities"
             required
           ></textarea>
         </div>
@@ -162,7 +179,7 @@ const AddJob = () => {
           </label>
           <input
             type="text"
-            name="HR_Name"
+            name="hr_email"
             placeholder="HR Name"
             className="input input-bordered"
             required
@@ -175,8 +192,22 @@ const AddJob = () => {
           </label>
           <input
             type="text"
-            name="HR_Email"
+            name="hr_email"
             placeholder="HR Email"
+            defaultValue={user?.email}
+            className="input input-bordered"
+            required
+          />
+        </div>
+        {/* application deadline */}
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Deadline</span>
+          </label>
+          <input
+            type="date"
+            name="applicationDeadline"
+            placeholder="Deadline"
             className="input input-bordered"
             required
           />
